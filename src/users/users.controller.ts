@@ -18,7 +18,6 @@ export class UsersController {
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     try {
-      console.log('createUserDto', createUserDto);
       return await this.usersService.create(createUserDto);
     } catch (ex) {
       throw ex;
