@@ -1,23 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { UserEntity } from './entities/user.entity';
+import { User, UserDocument } from './schemas/user.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class UsersService {
-  private users: User[] = [];
-  private user_id = 1;
 
-  async create(createUserDto: CreateUserDto) {
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+
+  async create(createUserDto: CreateUserDto): Promise<User> {
     try {
-      const newUser = new User(
-        this.user_id++,
-        createUserDto.email,
-        createUserDto.password,
-        createUserDto.role,
-      );
-      this.users.push(newUser);
-      return newUser;
+      const createdUser = new this.userModel(createUserDto);
+      return createdUser.save();
     } catch (ex) {
       throw ex;
     }
@@ -25,37 +22,54 @@ export class UsersService {
 
   async findAll() {
     try {
-      return this.users;
+      const user = await this.userModel.find().exec();
+      if(!user) {
+        throw new NotFoundException('Users not found');
+      }
+      return user;
     } catch (ex) {
       throw ex;
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     try {
-      return this.users.find((usr) => usr.id == id);
+      const user = await this.userModel.findById(id).exec();
+      if(!user) {
+        throw new NotFoundException('User not found');
+      }
+      return user;
     } catch (ex) {
       throw ex;
     }
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: any, updateUserDto: UpdateUserDto) {
     try {
-      const existingUser = this.users.find((usr) => usr.id == id);
-      const userIndex = this.users.indexOf(existingUser, 0);
-      this.users[userIndex] = updateUserDto;
-      return this.users[userIndex];
+      const updatedUser = await this.userModel.findById(id).exec();
+      if(!updatedUser) {
+        throw new NotFoundException('User not found');
+      }
+      if(updateUserDto.email) {
+        updatedUser.email = updateUserDto.email;
+      }
+      if(updateUserDto.password) {
+        updatedUser.password = updateUserDto.password;
+      }
+      if(updateUserDto.role) {
+        updatedUser.role = updateUserDto.role;
+      }
+      return updatedUser.save();
     } catch (ex) {
       throw ex;
     }
   }
 
-  async remove(id: number) {
+  async remove(id: any) {
     try {
-      const existingUser = this.users.find((usr) => usr.id == id);
-      const userIndex = this.users.indexOf(existingUser, 0);
-      this.users.splice(userIndex, 1);
-      return id;
+      await this.findOne(id);
+      const user = await this.userModel.deleteOne({_id: id}).exec();
+      return user;
     } catch (ex) {
       throw ex;
     }

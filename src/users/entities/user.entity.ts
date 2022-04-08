@@ -1,13 +1,14 @@
-enum RoleEnum {
-  'ADMIN',
-  'USER',
-}
+// enum RoleEnum {
+//   'ADMIN',
+//   'USER',
+// }
 
-export class User {
+export class UserEntity {
   constructor(
-    public id: number,
+    public id: string,
     public email: string,
     public password: string,
-    public role: RoleEnum,
+    // public role: RoleEnum,
+    public role: string,
   ) {}
 }
