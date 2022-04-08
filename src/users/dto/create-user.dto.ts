@@ -1,11 +1,12 @@
-enum RoleEnum {
-  'ADMIN',
-  'USER',
-}
+// enum RoleEnum {
+//   'ADMIN',
+//   'USER',
+// }
 
 export class CreateUserDto {
   id: number;
   email: string;
   password: string;
-  role: RoleEnum;
+  // role: RoleEnum;
+  role: string;
 }
