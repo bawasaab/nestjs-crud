@@ -5,7 +5,7 @@ import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  private users = [];
+  private users: User[] = [];
   private user_id = 1;
 
   async create(createUserDto: CreateUserDto) {
@@ -51,9 +51,13 @@ export class UsersService {
   }
 
   async remove(id: number) {
-    const existingUser = this.users.find((usr) => usr.id == id);
-    const userIndex = this.users.indexOf(existingUser, 0);
-    this.users.splice(userIndex, 1);
-    return id;
+    try {
+      const existingUser = this.users.find((usr) => usr.id == id);
+      const userIndex = this.users.indexOf(existingUser, 0);
+      this.users.splice(userIndex, 1);
+      return id;
+    } catch (ex) {
+      throw ex;
+    }
   }
 }
